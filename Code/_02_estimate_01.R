@@ -46,7 +46,6 @@ ky = read_csv("Data/_Cleaned/ky_data.csv")
 #         and later estimate excess mortality over
 # =============================================================================
 
-# Adjust these dates to match your pandemic of interest (e.g., 1918 flu)
 pandemic_start <- as.Date("1918-03-01")
 pandemic_end   <- as.Date("1920-05-01")
 
@@ -89,10 +88,10 @@ summary(ky_counts)
 ky_counts_expect <- compute_expected(
   counts          = ky_counts,
   exclude         = exclude_dates,
-  include.trend   = T,          # slow year-to-year trend
-  harmonics       = 2,             # seasonal harmonics
-  frequency       = 12,            # monthly data
-  weekday.effect  = FALSE,         # not applicable for monthly
+  include.trend   = T,          
+  harmonics       = 2,          
+  frequency       = 12,         
+  weekday.effect  = FALSE,      
   keep.components = TRUE,
   verbose         = TRUE
 )
@@ -100,9 +99,6 @@ ky_counts_expect <- compute_expected(
 # =============================================================================
 # STEP 4: Diagnostic — visually inspect expected vs observed counts
 # =============================================================================
-
-expected_plot(ky_counts_expect, title = "Kentucky Monthly Mortality: Observed vs Expected")
-
 # Formal diagnostic for model fit
 expected_diagnostic(ky_counts_expect)
 
@@ -138,7 +134,7 @@ plot(ky_cumulative)
 #
 # pandemic_death distinguishes pandemic causes from non-pandemic causes.
 # We run the full expected counts + excess model pipeline separately for
-# each unique value of pandemic_death (e.g. "pandemic_death", "non_pandemic_death").
+# each unique value of pandemic_death 
 # Population is held constant across cause groups since it is cause-agnostic.
 # =============================================================================
 
@@ -275,12 +271,6 @@ md_excess <- excess_model(
   intervals = pandemic_interval,
   verbose   = TRUE
 )
-
-# View summary statistics: excess counts, rates, confidence intervals
-md_excess$excess
-
-# Plot the excess
-excess_plot(md_excess, title = "Maryland Excess Mortality — Pandemic Period")
 
 # Cumulative excess deaths over the pandemic window
 md_cumulative <- excess_cumulative(

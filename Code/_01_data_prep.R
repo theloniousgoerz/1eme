@@ -20,6 +20,7 @@
 # Install 
 # install.packages("excessmort")
 # Packages 
+rm(list = ls())
 library(readr)
 library(tidyverse)
 library(magrittr)
