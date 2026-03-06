@@ -46,6 +46,7 @@ ky = read_csv("Data/_Cleaned/ky_data.csv")
 #         and later estimate excess mortality over
 # =============================================================================
 
+# Adjust these dates to match your pandemic of interest (e.g., 1918 flu)
 pandemic_start <- as.Date("1918-03-01")
 pandemic_end   <- as.Date("1920-05-01")
 
@@ -65,7 +66,7 @@ exclude_dates <- seq(pandemic_start, pandemic_end, by = "month")
 # =============================================================================
 
 ky_counts <-
-ky %>%
+  ky %>%
   filter(pandemic_death == "pandemic_death") %>%
   mutate(date = as.Date(paste(year, month, "01", sep = "-")),
          outcome = deaths) %>%
@@ -88,10 +89,10 @@ summary(ky_counts)
 ky_counts_expect <- compute_expected(
   counts          = ky_counts,
   exclude         = exclude_dates,
-  include.trend   = T,          
-  harmonics       = 2,          
-  frequency       = 12,         
-  weekday.effect  = FALSE,      
+  include.trend   = T,          # slow year-to-year trend
+  harmonics       = 2,             # seasonal harmonics
+  frequency       = 12,            # monthly data
+  weekday.effect  = FALSE,         # not applicable for monthly
   keep.components = TRUE,
   verbose         = TRUE
 )
@@ -99,6 +100,9 @@ ky_counts_expect <- compute_expected(
 # =============================================================================
 # STEP 4: Diagnostic — visually inspect expected vs observed counts
 # =============================================================================
+
+expected_plot(ky_counts_expect, title = "Kentucky Monthly Mortality: Observed vs Expected")
+
 # Formal diagnostic for model fit
 expected_diagnostic(ky_counts_expect)
 
@@ -134,7 +138,7 @@ plot(ky_cumulative)
 #
 # pandemic_death distinguishes pandemic causes from non-pandemic causes.
 # We run the full expected counts + excess model pipeline separately for
-# each unique value of pandemic_death 
+# each unique value of pandemic_death (e.g. "pandemic_death", "non_pandemic_death").
 # Population is held constant across cause groups since it is cause-agnostic.
 # =============================================================================
 
@@ -216,20 +220,15 @@ ky_counts_expect <- ky_counts_expect %>%
 # NOTE: if you want to stratify (e.g., by race or cause), see Step 6
 # =============================================================================
 
-md_counts <- md_merged %>%
-  group_by(year, month) %>%
-  summarise(
-    outcome    = sum(deaths, na.rm = TRUE),
-    population = sum(population, na.rm = TRUE),
-    .groups    = "drop"
-  ) %>%
-  mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
+md_counts <-
+  md %>%
+  filter(pandemic_death == "pandemic_death") %>%
+  mutate(date = as.Date(paste(year, month, "01", sep = "-")),
+         outcome = deaths) %>%
   arrange(date) %>%
   select(date, outcome, population)
 
-# Quick sanity check
-glimpse(md_counts)
-summary(md_counts)
+
 
 # =============================================================================
 # STEP 3: Compute expected counts
@@ -255,7 +254,7 @@ md_counts_expect <- compute_expected(
 # STEP 4: Diagnostic — visually inspect expected vs observed counts
 # =============================================================================
 
-expected_plot(md_counts_expect, title = "Maryland Monthly Mortality: Observed vs Expected")
+expected_plot(ky_counts_expect, title = "Maryland Monthly Mortality: Observed vs Expected")
 
 # Formal diagnostic for model fit
 expected_diagnostic(md_counts_expect)
@@ -272,6 +271,12 @@ md_excess <- excess_model(
   verbose   = TRUE
 )
 
+# View summary statistics: excess counts, rates, confidence intervals
+md_excess$excess
+
+# Plot the excess
+excess_plot(ky_excess, title = "Maryland Excess Mortality — Pandemic Period")
+
 # Cumulative excess deaths over the pandemic window
 md_cumulative <- excess_cumulative(
   fit   = md_excess,
@@ -281,6 +286,61 @@ md_cumulative <- excess_cumulative(
 
 plot(md_cumulative)
 
+
+cause_groups <- unique(ky$pandemic_death)
+
+md_excess_by_cause <- map(cause_groups, function(c) {
+  
+  message("Processing cause group: ", c)
+  
+  counts_c <- md %>%
+    filter(pandemic_death == c) %>%
+    group_by(year, month) %>%
+    summarise(
+      outcome    = sum(deaths, na.rm = TRUE),
+      population = sum(population, na.rm = TRUE),
+      .groups    = "drop"
+    ) %>%
+    mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
+    arrange(date) %>%
+    select(date, outcome, population)
+  
+  # Skip if average counts are very low (model will warn)
+  if (mean(counts_c$outcome, na.rm = TRUE) < 1) {
+    message("  Skipping — average monthly counts < 1 for cause group: ", c)
+    return(NULL)
+  }
+  
+  counts_c_expect <- compute_expected(
+    counts         = counts_c,
+    exclude        = exclude_dates,
+    include.trend  = TRUE,
+    harmonics      = 2,
+    frequency      = 12,
+    weekday.effect = FALSE,
+    verbose        = FALSE
+  )
+  
+  excess_c <- excess_model(
+    counts    = counts_c_expect,
+    start     = pandemic_start,
+    end       = pandemic_end,
+    intervals = pandemic_interval,
+    verbose   = FALSE
+  )
+  
+  excess_c$excess %>% mutate(pandemic_death = c)
+  
+}) %>%
+  set_names(cause_groups) %>%
+  compact()                # drop NULLs from skipped groups
+
+# Combine results into one table
+md_excess_cause_summary <- bind_rows(md_excess_by_cause)
+datasummary_df(md_excess_cause_summary)
+
+
+
 # =============================================================================
 # STEP 6 (OPTIONAL): Stratified analysis — run separately by race or cause
 #
@@ -289,7 +349,7 @@ plot(md_cumulative)
 # =============================================================================
 
 # -- Stratify by race
-race_groups <- unique(md_merged$race)
+race_groups <- unique(md_counts$race)
 
 md_excess_by_race <- map(race_groups, function(r) {
   
@@ -359,5 +419,10 @@ md_counts_expect <- md_counts_expect %>%
 # =============================================================================
 # Temp Estimate 1
 write_rds(ky_excess_cause_summary,"Estimates/ky_estimate_1.rds")
+
+# Temp Estimate 2
+write_rds(md_excess_cause_summary,"Estimates/md_estimate_1.rds")
+
+
 
 
