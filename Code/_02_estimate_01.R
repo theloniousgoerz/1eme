@@ -73,10 +73,6 @@ ky_counts <-
   arrange(date) %>%
   select(date, outcome, population)
 
-# Quick sanity check
-glimpse(ky_counts)
-summary(ky_counts)
-
 # =============================================================================
 # STEP 3: Compute expected counts
 #
@@ -101,10 +97,8 @@ ky_counts_expect <- compute_expected(
 # STEP 4: Diagnostic — visually inspect expected vs observed counts
 # =============================================================================
 
-expected_plot(ky_counts_expect, title = "Kentucky Monthly Mortality: Observed vs Expected")
-
-# Formal diagnostic for model fit
-expected_diagnostic(ky_counts_expect)
+# expected_plot(ky_counts_expect, title = "Kentucky Monthly Mortality: Observed vs Expected")
+# expected_diagnostic(ky_counts_expect)
 
 # =============================================================================
 # STEP 5: Fit the excess mortality model over the pandemic interval
@@ -122,7 +116,7 @@ ky_excess <- excess_model(
 ky_excess$excess
 
 # Plot the excess
-excess_plot(ky_excess, title = "Kentucky Excess Mortality — Pandemic Period")
+# excess_plot(ky_excess, title = "Kentucky Excess Mortality — Pandemic Period")
 
 # Cumulative excess deaths over the pandemic window
 ky_cumulative <- excess_cumulative(
@@ -131,7 +125,7 @@ ky_cumulative <- excess_cumulative(
   end   = pandemic_end
 )
 
-plot(ky_cumulative)
+# plot(ky_cumulative)
 
 # =============================================================================
 # STEP 6: Cause-specific excess mortality — stratified by pandemic_death
