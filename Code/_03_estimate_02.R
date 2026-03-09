@@ -54,6 +54,12 @@ ky %<>% mutate(month = as.integer(str_sub(date,6,7)))
 # =============================================================================
 run_excess <- function(df, group_vars) {
   
+  # explicitly reference global variables inside function scope
+  excl   <- get("exclude_dates",   envir = .GlobalEnv)
+  p_start <- get("pandemic_start", envir = .GlobalEnv)
+  p_end   <- get("pandemic_end",   envir = .GlobalEnv)
+  p_int   <- get("pandemic_interval", envir = .GlobalEnv)
+  
   counts <- df %>%
     group_by(year, month) %>%
     summarise(
@@ -69,17 +75,15 @@ run_excess <- function(df, group_vars) {
   
   counts_expect <- tryCatch(
     compute_expected(
-      counts          = counts,
-      exclude         = exclude_dates,
-      include.trend   = TRUE,
-      harmonics       = 2,
-      frequency       = 12,
-      weekday.effect  = FALSE,
-      trend.knots.per.year  = 2,        # reduced from default to avoid overfitting
-      verbose         = FALSE
+      counts         = counts,
+      exclude        = excl,
+      include.trend  = TRUE,
+      harmonics      = 2,
+      frequency      = 12,
+      weekday.effect = FALSE,
+      verbose        = FALSE
     ),
-    error   = function(e) { message("compute_expected failed: ", e$message); NULL },
-    warning = function(w) { message("compute_expected warning: ", w$message); NULL }
+    error = function(e) { message("compute_expected failed: ", e$message); NULL }
   )
   
   if (is.null(counts_expect)) return(NULL)
@@ -87,61 +91,18 @@ run_excess <- function(df, group_vars) {
   excess <- tryCatch(
     excess_model(
       counts    = counts_expect,
-      start     = pandemic_start,
-      end       = pandemic_end,
-      intervals = pandemic_interval,
+      start     = p_start,
+      end       = p_end,
+      intervals = p_int,
       verbose   = FALSE
     ),
-    error   = function(e) { message("excess_model failed: ", e$message); NULL },
-    warning = function(w) { message("excess_model warning: ", w$message); NULL }
+    error = function(e) { message("excess_model failed: ", e$message); NULL }
   )
   
   if (is.null(excess)) return(NULL)
   
   excess$excess %>% bind_cols(group_vars)
 }
-
-
-test_df <- ky %>% filter(county == first(county))
-
-counts <- test_df %>%
-  group_by(year, month) %>%
-  summarise(
-    outcome    = sum(deaths,     na.rm = TRUE),
-    population = sum(population, na.rm = TRUE),
-    .groups    = "drop"
-  ) %>%
-  mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
-  arrange(date) %>%
-  select(date, outcome, population)
-
-print(counts)
-
-counts_expect <- compute_expected(
-  counts         = counts,
-  exclude        = exclude_dates,
-  include.trend  = TRUE,
-  harmonics      = 2,
-  frequency      = 12,
-  weekday.effect = FALSE,
-  verbose        = TRUE  # set TRUE so it prints what's happening
-)
-
-print(counts_expect)
-
-excess <- excess_model(
-  counts    = counts_expect,
-  start     = pandemic_start,
-  end       = pandemic_end,
-  intervals = pandemic_interval,
-  verbose   = TRUE
-)
-
-print(excess$excess)
-
-result <- run_excess(test_df, grp)
-print(result)
-
 # =============================================================================
 # Kentucky: excess mortality by county
 # =============================================================================
@@ -175,6 +136,9 @@ md_county_results <- md %>%
 # =============================================================================
 # Final outputs
 # =============================================================================
+# Estimate 1
+write_rds(ky_county_results,"Estimates/ky_estimate_2.rds")
+# Estimate 2
+write_rds(ky_county_results,"Estimates/md_estimate_2.rds")
 
-ky_county_results
-md_county_results
+

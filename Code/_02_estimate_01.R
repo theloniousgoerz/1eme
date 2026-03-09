@@ -411,10 +411,10 @@ md_counts_expect <- md_counts_expect %>%
 # Finalize Estimates 
 
 # =============================================================================
-# Temp Estimate 1
+# Estimate 1
 write_rds(ky_excess_cause_summary,"Estimates/ky_estimate_1.rds")
 
-# Temp Estimate 2
+# Estimate 2
 write_rds(md_excess_cause_summary,"Estimates/md_estimate_1.rds")
 
 
