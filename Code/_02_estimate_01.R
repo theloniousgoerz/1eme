@@ -333,64 +333,6 @@ md_excess_by_cause <- map(cause_groups, function(c) {
 md_excess_cause_summary <- bind_rows(md_excess_by_cause)
 datasummary_df(md_excess_cause_summary)
 
-
-
-# =============================================================================
-# STEP 6 (OPTIONAL): Stratified analysis — run separately by race or cause
-#
-# Repeat Steps 2-5 inside a loop or with purrr::map over subgroups.
-# Example: stratify by race
-# =============================================================================
-
-# -- Stratify by race
-race_groups <- unique(md_counts$race)
-
-md_excess_by_race <- map(race_groups, function(r) {
-  
-  message("Processing race group: ", r)
-  
-  counts_r <- md_merged %>%
-    filter(race == r) %>%
-    group_by(year, month) %>%
-    summarise(
-      outcome    = sum(deaths, na.rm = TRUE),
-      population = sum(population, na.rm = TRUE),
-      .groups    = "drop"
-    ) %>%
-    mutate(date = as.Date(paste(year, month, "01", sep = "-"))) %>%
-    arrange(date) %>%
-    select(date, outcome, population)
-  
-  # Skip if average counts are very low (model will warn)
-  if (mean(counts_r$outcome, na.rm = TRUE) < 1) {
-    message("  Skipping — average monthly counts < 1 for race group: ", r)
-    return(NULL)
-  }
-  
-  counts_r_expect <- compute_expected(
-    counts         = counts_r,
-    exclude        = exclude_dates,
-    include.trend  = TRUE,
-    harmonics      = 2,
-    frequency      = 12,
-    weekday.effect = FALSE,
-    verbose        = FALSE
-  )
-  
-  excess_r <- excess_model(
-    counts    = counts_r_expect,
-    start     = pandemic_start,
-    end       = pandemic_end,
-    intervals = pandemic_interval,
-    verbose   = FALSE
-  )
-  
-  excess_r$excess %>% mutate(race = r)
-  
-}) %>%
-  set_names(race_groups) %>%
-  compact()                # drop NULLs from skipped groups
-
 # Combine results into one table
 md_excess_race_summary <- bind_rows(md_excess_by_race)
 print(md_excess_race_summary)
