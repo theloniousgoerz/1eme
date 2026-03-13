@@ -59,10 +59,6 @@ exclude_dates <- seq(pandemic_start, pandemic_end, by = "month")
 
 # =============================================================================
 # STEP 2: Prepare counts table — aggregate to state level by year/month
-#
-# excessmort needs: date (first of month), outcome (total deaths), population
-# We sum deaths and population across counties, causes, and races
-# NOTE: if you want to stratify (e.g., by race or cause), see Step 6
 # =============================================================================
 
 ky_counts <-
@@ -129,11 +125,7 @@ ky_cumulative <- excess_cumulative(
 
 # =============================================================================
 # STEP 6: Cause-specific excess mortality — stratified by pandemic_death
-#
-# pandemic_death distinguishes pandemic causes from non-pandemic causes.
-# We run the full expected counts + excess model pipeline separately for
-# each unique value of pandemic_death (e.g. "pandemic_death", "non_pandemic_death").
-# Population is held constant across cause groups since it is cause-agnostic.
+
 # =============================================================================
 
 cause_groups <- unique(ky$pandemic_death)
@@ -154,7 +146,6 @@ ky_excess_by_cause <- map(cause_groups, function(c) {
     arrange(date) %>%
     select(date, outcome, population)
   
-  # Skip if average counts are very low (model will warn)
   if (mean(counts_c$outcome, na.rm = TRUE) < 1) {
     message("  Skipping — average monthly counts < 1 for cause group: ", c)
     return(NULL)
@@ -208,10 +199,7 @@ ky_counts_expect <- ky_counts_expect %>%
 
 # =============================================================================
 # STEP 2: Prepare counts table — aggregate to state level by year/month
-#
-# excessmort needs: date (first of month), outcome (total deaths), population
-# We sum deaths and population across counties, causes, and races
-# NOTE: if you want to stratify (e.g., by race or cause), see Step 6
+
 # =============================================================================
 
 md_counts <-
