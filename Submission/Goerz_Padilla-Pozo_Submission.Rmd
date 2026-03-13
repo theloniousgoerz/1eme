@@ -50,7 +50,7 @@ header-includes:
 
 # Summary
 
-We estimate pandemic-era excess mortality for Maryland and Kentucky using the \texttt{excessmort} package in R. The core approach fits an overdispersed Poisson regression model to pre-pandemic monthly death counts, incorporating a slow secular time trend (via spline) and seasonal variation (two Fourier harmonics at monthly frequency). Expected death counts under a counterfactual no-pandemic scenario were then extrapolated across the pandemic interval (March 1918 – May 1920). We estimate deaths and death rates along with associated 95% confidence intervals. The \textbf{Estimates} section displays these.
+We estimate pandemic-era excess mortality for Maryland and Kentucky using the \texttt{excessmort} package in R. The core approach fits an overdispersed Poisson regression model to pre-pandemic monthly death counts, incorporating a slow secular time trend (via spline) and seasonal variation (two Fourier harmonics at monthly frequency). Expected death counts under a counterfactual no-pandemic scenario were then extrapolated across the pandemic interval (March 1918 – May 1920). We estimate deaths and death rates along with associated 95% confidence intervals.
 
 Pandemic deaths were defined conservatively across estimands 1 and 3 as deaths attributed to influenza, pulmonary tuberculosis, or bronchitis — causes that are ydirectly associated with the 1918 pandemic. The three estimands differ in their unit of analysis and stratification.
 
@@ -60,19 +60,4 @@ Estimand 2: County-level: The excess model was run independently for each county
 
 Estimand 3: State-level by race: Pandemic-cause deaths were aggregated to the state-month level separately by racial group, and excess models were fit independently for each race stratum. This estimand examines whether the pandemic's mortality burden fell disproportionately across racial groups. Population denominators were interpolated linearly between decadal census years within each county.
 
-# Estimates
 
-\input{./e1_table.tex}
-
-\begin{table}[h]
-  \begin{adjustbox}{max width=\textwidth}
-    \input{./e2_1_table.tex}
-  \end{adjustbox}
-\end{table}
-
-\begin{table}[h]
-  \begin{adjustbox}{max width=\textwidth,height= .5\textheight}
-    \input{./e2_2_table.tex}
-  \end{adjustbox}
-\end{table}
-\input{./e3_table.tex}

@@ -60,8 +60,15 @@ md_county_clean <- md_county %>%
 ky_month_clean <- ky_month %>%
   mutate(state = "Kentucky")
 
-ky_county_clean <- ky_county %>%
+ky_county_clean <- 
+ky_county %>%
   mutate(state = "Kentucky")
+
+ky_denom %<>%
+  mutate(
+    # Rename LaRue to R capitalize. 
+    county = ifelse(county == "Larue County","LaRue County",county)
+  )
 
 # =============================================================================
 # STEP 2A: Aggregate denominator data
@@ -125,7 +132,7 @@ interpolate_population_md <- function(denom_agg) {
     complete(year = year_min:year_max) %>%
     arrange(year) %>%
     mutate(
-      population = na.approx(population, x = year, na.rm = FALSE, rule = 2)
+      population = na.approx(population, x = year, na.rm = T, rule = 2)
     ) %>%
     ungroup()
 }
@@ -137,7 +144,7 @@ interpolate_population_ky <- function(denom_agg) {
     complete(year = year_min:year_max) %>%
     arrange(year) %>%
     mutate(
-      population = na.approx(population, x = year, na.rm = FALSE, rule = 2)
+      population = na.approx(population, x = year, na.rm = T, rule = 2)
     ) %>%
     ungroup()
 }
@@ -153,12 +160,6 @@ ky_denom_interp_county <- interpolate_population_ky(ky_denom_agg_county)
 # =============================================================================
 # STEP 3: Merge numerator and denominator separately for each state
 #
-# NOTE: The numerator is at state/year/month/race/cause level.
-#       The denominator is now at state/county/year/race level (annual).
-#       Merging on state/year/race will expand the numerator across all
-#       counties for that state/year/race combination.
-#       Each death count row will be repeated once per county.
-#       This is expected given the differing granularities.
 # =============================================================================
 
 md_merged <- md_month_clean %>%
@@ -212,10 +213,11 @@ md_merged %<>%
 # Write Results for Estimation
 # =============================================================================
 # Filter out missing population
-md_merged %<>% filter(!is.na(population)) 
-ky_merged %<>% filter(!is.na(population)) 
-md_merged_county %<>% filter(!is.na(population)) 
-ky_merged_county %<>% filter(!is.na(population)) 
+ md_merged %<>% filter(!is.na(population)) 
+ ky_merged %<>% filter(!is.na(population)) 
+ md_merged_county %<>% filter(!is.na(population)) 
+ ky_merged_county %<>% filter(!is.na(population))
+
 
 # == Save 
 write_csv(md_merged,"Data/_Cleaned/md_data.csv")

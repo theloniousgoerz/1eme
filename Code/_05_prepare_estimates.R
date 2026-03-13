@@ -60,7 +60,13 @@ rbind(e_ky_1,e_md_1)  %>% mutate(
   `Pandemic Death Number (95 percent CI)` = paste0(round(observed, 2), 
                                                    " [", round(number_ci_low, 2), 
                                                    ", ", round(number_ci_hi, 2), "]")
-)  %>%
+) 
+
+e_1 %>% select(observed,number_ci_low,number_ci_hi,obs_death_rate,rate_ci_low,rate_ci_hi,State) %>% 
+  write_csv(.,here("Submission","e1.csv"))
+
+# Table 
+e_1 %>%
   select(State,`Pandemic Death Rate (95 percent CI)`,`Pandemic Death Number (95 percent CI)`) %>%
   pivot_longer(cols = c(-State),
                names_to = " ",
@@ -95,12 +101,17 @@ e_md_2 %>%
     `Pandemic Death Number (95 percent CI)` = paste0(round(observed, 2), 
                                      " [", round(number_ci_low, 2), 
                                      ", ", round(number_ci_hi, 2), "]")
-  ) %>%
-  select(
-    County                  = county,
-    `Pandemic Death Rate (95 percent CI)`,
-    `Pandemic Death Number (95 percent CI)`
-  ) %>% datasummary_df(title = "Estimand 2: The total number and rate of panedmic deaths in Maryland",
+  ) 
+
+e_2_1 %>% select(observed,number_ci_low,number_ci_hi,obs_death_rate,rate_ci_low,rate_ci_hi,county) %>% 
+  write_csv(.,here("Submission","e2_1.csv"))
+
+# %>%
+#   select(
+#     County                  = county,
+#     `Pandemic Death Rate (95 percent CI)`,
+#     `Pandemic Death Number (95 percent CI)`
+#   ) %>% datasummary_df(title = "Estimand 2: The total number and rate of panedmic deaths in Maryland",
                        output = "tinytable",
                        align = "lcc")
 
@@ -125,7 +136,11 @@ e_2_2 = e_ky_2 %>%
     `Pandemic Death Number (95 percent CI)` = paste0(round(observed, 2), 
                                                      " [", round(number_ci_low, 2), 
                                                      ", ", round(number_ci_hi, 2), "]")
-  ) %>%
+  ) 
+e_2_2 %>% select(observed,number_ci_low,number_ci_hi,obs_death_rate,rate_ci_low,rate_ci_hi,county) %>% 
+  write_csv(.,here("Submission","e2_2.csv"))
+
+
   select(
     County                  = county,
     `Pandemic Death Rate (95 percent CI)`,
@@ -155,23 +170,9 @@ e_3 = e_md_3 %>%
     `Pandemic Death Number (95 percent CI)` = paste0(round(observed, 2), 
                                                      " [", round(number_ci_low, 2), 
                                                      ", ", round(number_ci_hi, 2), "]")
-  ) %>%
-  select(
-    Race = race,
-    `Pandemic Death Rate (95 percent CI)`,
-    `Pandemic Death Number (95 percent CI)`
-  ) %>% datasummary_df(title = "Estimand 3: The total number and rate of pandemic deaths by race in Maryland",
-                       output = "tinytable",align = "lcc")
+  ) 
 
-# ------------------------------
-# Save 
-# ------------------------------
-e_1 %>% 
-  save_tt(output = here("Submission","e1_table.tex"),overwrite = T)
-e_2_1 %>% 
-  save_tt(output = here("Submission","e2_1_table.tex"),overwrite = T)
-e_2_2 %>% 
-  save_tt(output = here("Submission","e2_2_table.tex"),overwrite = T)
-e_3 %>% 
-  save_tt(output = here("Submission","e3_table.tex"),overwrite = T)
+e_3 %>% select(observed,number_ci_low,number_ci_hi,obs_death_rate,rate_ci_low,rate_ci_hi,race) %>% 
+  write_csv(.,here("Submission","e3.csv"))
+
 
