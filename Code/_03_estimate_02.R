@@ -141,4 +141,3 @@ write_rds(ky_county_results,"Estimates/ky_estimate_2.rds")
 # Estimate 2
 write_rds(md_county_results,"Estimates/md_estimate_2.rds")
 
-ky %>% distinct(county)

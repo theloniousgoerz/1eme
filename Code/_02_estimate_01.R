@@ -8,7 +8,6 @@
 # Affiliation: Cornell University
 # =============================================================================
 # Created:     02-21-21
-# Modified:    [YYYY-MM-DD]
 # Version:     1.0
 # =============================================================================
 # Input:        Data/Mortality data; Denominator data
@@ -45,8 +44,6 @@ ky = read_csv("Data/_Cleaned/ky_data.csv")
 # STEP 1: Define the pandemic interval to exclude from baseline fitting
 #         and later estimate excess mortality over
 # =============================================================================
-
-# Adjust these dates to match your pandemic of interest (e.g., 1918 flu)
 pandemic_start <- as.Date("1918-03-01")
 pandemic_end   <- as.Date("1920-05-01")
 
@@ -90,41 +87,11 @@ ky_counts_expect <- compute_expected(
 )
 
 # =============================================================================
-# STEP 4: Diagnostic — visually inspect expected vs observed counts
+# STEP 4: Fit the excess mortality model over the pandemic interval
 # =============================================================================
 
-# expected_plot(ky_counts_expect, title = "Kentucky Monthly Mortality: Observed vs Expected")
-# expected_diagnostic(ky_counts_expect)
-
 # =============================================================================
-# STEP 5: Fit the excess mortality model over the pandemic interval
-# =============================================================================
-
-ky_excess <- excess_model(
-  counts    = ky_counts_expect,
-  start     = pandemic_start,
-  end       = pandemic_end,
-  intervals = pandemic_interval,
-  verbose   = TRUE
-)
-
-# View summary statistics: excess counts, rates, confidence intervals
-ky_excess$excess
-
-# Plot the excess
-# excess_plot(ky_excess, title = "Kentucky Excess Mortality — Pandemic Period")
-
-# Cumulative excess deaths over the pandemic window
-ky_cumulative <- excess_cumulative(
-  fit   = ky_excess,
-  start = pandemic_start,
-  end   = pandemic_end
-)
-
-# plot(ky_cumulative)
-
-# =============================================================================
-# STEP 6: Cause-specific excess mortality — stratified by pandemic_death
+# STEP 5: Cause-specific excess mortality — stratified by pandemic_death
 
 # =============================================================================
 
@@ -182,7 +149,7 @@ datasummary_df(ky_excess_cause_summary)
 
 
 # =============================================================================
-# STEP 7: Flag pandemic vs non-pandemic rows in the counts object
+# STEP 6: Flag pandemic vs non-pandemic rows in the counts object
 #         (mirrors your pandemic_death variable in the raw data)
 # =============================================================================
 
@@ -199,7 +166,6 @@ ky_counts_expect <- ky_counts_expect %>%
 
 # =============================================================================
 # STEP 2: Prepare counts table — aggregate to state level by year/month
-
 # =============================================================================
 
 md_counts <-
@@ -233,40 +199,8 @@ md_counts_expect <- compute_expected(
 )
 
 # =============================================================================
-# STEP 4: Diagnostic — visually inspect expected vs observed counts
+# STEP 4: Fit the excess mortality model over the pandemic interval
 # =============================================================================
-
-expected_plot(ky_counts_expect, title = "Maryland Monthly Mortality: Observed vs Expected")
-
-# Formal diagnostic for model fit
-expected_diagnostic(md_counts_expect)
-
-# =============================================================================
-# STEP 5: Fit the excess mortality model over the pandemic interval
-# =============================================================================
-
-md_excess <- excess_model(
-  counts    = md_counts_expect,
-  start     = pandemic_start,
-  end       = pandemic_end,
-  intervals = pandemic_interval,
-  verbose   = TRUE
-)
-
-# View summary statistics: excess counts, rates, confidence intervals
-md_excess$excess
-
-# Plot the excess
-excess_plot(ky_excess, title = "Maryland Excess Mortality — Pandemic Period")
-
-# Cumulative excess deaths over the pandemic window
-md_cumulative <- excess_cumulative(
-  fit   = md_excess,
-  start = pandemic_start,
-  end   = pandemic_end
-)
-
-plot(md_cumulative)
 
 
 cause_groups <- unique(ky$pandemic_death)
@@ -321,12 +255,9 @@ md_excess_by_cause <- map(cause_groups, function(c) {
 md_excess_cause_summary <- bind_rows(md_excess_by_cause)
 datasummary_df(md_excess_cause_summary)
 
-# Combine results into one table
-md_excess_race_summary <- bind_rows(md_excess_by_race)
-print(md_excess_race_summary)
 
 # =============================================================================
-# STEP 7: Flag pandemic vs non-pandemic rows in the counts object
+# STEP 5: Flag pandemic vs non-pandemic rows in the counts object
 #         (mirrors your pandemic_death variable in the raw data)
 # =============================================================================
 
