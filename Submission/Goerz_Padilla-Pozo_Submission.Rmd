@@ -52,7 +52,7 @@ header-includes:
 
 We estimate pandemic-era excess mortality for Maryland and Kentucky using the \texttt{excessmort} package in R. The core approach fits an overdispersed Poisson regression model to pre-pandemic monthly death counts, incorporating a slow secular time trend (via spline) and seasonal variation (two Fourier harmonics at monthly frequency). Expected death counts under a counterfactual no-pandemic scenario were then extrapolated across the pandemic interval (March 1918 – May 1920). We estimate deaths and death rates along with associated 95% confidence intervals.
 
-Pandemic deaths were defined conservatively across estimands 1 and 3 as deaths attributed to influenza, pulmonary tuberculosis, or bronchitis — causes that are ydirectly associated with the 1918 pandemic. The three estimands differ in their unit of analysis and stratification.
+Pandemic deaths were defined conservatively across estimands 1 and 3 as deaths attributed to influenza, pulmonary tuberculosis, or bronchitis — causes that are directly associated with the 1918 pandemic. The three estimands differ in their unit of analysis and stratification.
 
 Estimand 1: State-level: Pandemic-cause deaths were aggregated to the state-month level across all counties and racial groups, and a single excess model was fit for each state.
 
