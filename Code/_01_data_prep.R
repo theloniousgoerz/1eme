@@ -3,23 +3,10 @@
 # Script:      Data Prep
 # Description: This script imports necessary data and preps it for estimation.
 # =============================================================================
-# Author(s):   Thelonious Goerz
-#              Alvaro Padilla-Pozo
-# Affiliation: Cornell University
-# =============================================================================
-# Created:     02-21-21
-# Version:     1.0
-# =============================================================================
-# Input:        Data/Mortality data; Denominator data
-# Output:       [Output file(s) or objects produced]
-# =============================================================================
-# Notes:
-#   - 
-# =============================================================================
-# Install 
-# install.packages("excessmort")
 # Packages 
 rm(list = ls())
+# install.packages("excessmort")
+
 library(readr)
 library(tidyverse)
 library(magrittr)
@@ -71,10 +58,6 @@ ky_denom %<>%
 
 # =============================================================================
 # STEP 2A: Aggregate denominator data
-#
-# Two versions are created for each state:
-#   1. State-level aggregation (original behavior)
-#   2. County-state-level aggregation (new - not collapsed to state level)
 # =============================================================================
 
 # --- Maryland: State-level aggregation 
@@ -89,9 +72,6 @@ md_denom_agg_county <- md_denom %>%
   group_by(state, county, year, race) %>%
   summarise(population = sum(population, na.rm = TRUE), .groups = "drop")
 # Note: For Maryland, county is already retained so this mirrors md_denom_agg.
-# If your raw md_denom has sub-county geographies, adjust the group_by below
-# to retain the finest geographic unit you want:
-# group_by(state, county, sub_county_var, year, race)
 
 # --- Kentucky: State-level aggregation
 ky_denom_agg <- ky_denom %>%
@@ -106,19 +86,6 @@ ky_denom_agg_county <- ky_denom %>%
   summarise(population = sum(population, na.rm = TRUE), .groups = "drop")
 # =============================================================================
 # STEP 2B: Interpolate decadal census counts to annual estimates
-#
-# The denominator only has population at census years (e.g. 1900, 1910, 1920).
-# We linearly interpolate within each state/county/race group to produce
-# a population estimate for every year in the numerator's range.
-#
-# Approach:
-#   1. Expand each group to a full annual sequence spanning the data range
-#   2. Place observed decadal counts at their census years (NA elsewhere)
-#   3. Use zoo::na.approx() for linear interpolation between census years
-#   4. Use zoo::na.approx() with rule = 2 to fill any leading/trailing NAs
-#      (i.e. flat extrapolation beyond the first/last census year)
-#
-# Both state-level and county-level datasets go through the same procedure.
 # =============================================================================
 
 year_min <- 1900
@@ -158,7 +125,6 @@ ky_denom_interp_county <- interpolate_population_ky(ky_denom_agg_county)
 
 # =============================================================================
 # STEP 3: Merge numerator and denominator separately for each state
-#
 # =============================================================================
 
 md_merged <- md_month_clean %>%

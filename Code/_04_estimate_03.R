@@ -7,18 +7,6 @@
 #              Alvaro Padilla-Pozo
 # Affiliation: Cornell University
 # =============================================================================
-# Created:     02-21-21
-# Modified:    [YYYY-MM-DD]
-# Version:     1.0
-# =============================================================================
-# Input:        Data/Mortality data; Denominator data
-# Output:       Estimates/estimate_3
-# =============================================================================
-# Notes:
-#   - 
-# =============================================================================
-# Install 
-# install.packages("excessmort")
 # Packages 
 rm(list = ls())
 library(readr)

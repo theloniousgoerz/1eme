@@ -7,17 +7,6 @@
 #              Alvaro Padilla-Pozo
 # Affiliation: Cornell University
 # =============================================================================
-# Created:     02-21-21
-# Version:     1.0
-# =============================================================================
-# Input:        Data/Mortality data; Denominator data
-# Output:       Estimates/estimate_1
-# =============================================================================
-# Notes:
-#   - 
-# =============================================================================
-# Install 
-# install.packages("excessmort")
 # Packages 
 rm(list = ls())
 library(readr)
@@ -92,7 +81,6 @@ ky_counts_expect <- compute_expected(
 
 # =============================================================================
 # STEP 5: Cause-specific excess mortality — stratified by pandemic_death
-
 # =============================================================================
 
 cause_groups <- unique(ky$pandemic_death)
@@ -150,7 +138,6 @@ datasummary_df(ky_excess_cause_summary)
 
 # =============================================================================
 # STEP 6: Flag pandemic vs non-pandemic rows in the counts object
-#         (mirrors your pandemic_death variable in the raw data)
 # =============================================================================
 
 ky_counts_expect <- ky_counts_expect %>%
@@ -180,7 +167,6 @@ md_counts <-
 
 # =============================================================================
 # STEP 3: Compute expected counts
-#
 # The model fits an overdispersed Poisson with:
 #   - A slow time trend (spline)
 #   - A seasonal (Fourier harmonic) effect
@@ -249,7 +235,7 @@ md_excess_by_cause <- map(cause_groups, function(c) {
   
 }) %>%
   set_names(cause_groups) %>%
-  compact()                # drop NULLs from skipped groups
+  compact()                
 
 # Combine results into one table
 md_excess_cause_summary <- bind_rows(md_excess_by_cause)
@@ -258,7 +244,6 @@ datasummary_df(md_excess_cause_summary)
 
 # =============================================================================
 # STEP 5: Flag pandemic vs non-pandemic rows in the counts object
-#         (mirrors your pandemic_death variable in the raw data)
 # =============================================================================
 
 md_counts_expect <- md_counts_expect %>%
