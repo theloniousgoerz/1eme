@@ -8,7 +8,6 @@
 # Affiliation: Cornell University
 # =============================================================================
 # Created:     03-11-26
-# Modified:    [YYYY-MM-DD]
 # Version:     1.0
 # =============================================================================
 # Input:        Estimates/
@@ -65,18 +64,6 @@ rbind(e_ky_1,e_md_1)  %>% mutate(
 e_1 %>% select(observed,number_ci_low,number_ci_hi,obs_death_rate,rate_ci_low,rate_ci_hi,State) %>% 
   write_csv(.,here("Submission","e1.csv"))
 
-# Table 
-e_1 %>%
-  select(State,`Pandemic Death Rate (95 percent CI)`,`Pandemic Death Number (95 percent CI)`) %>%
-  pivot_longer(cols = c(-State),
-               names_to = " ",
-               values_to = "Coefficient") %>% 
-  pivot_wider(names_from = "State",
-              values_from = "Coefficient") %>% 
-  datasummary_df(title = "Estimand 1: The total number and rate of panedmic deaths in Maryland and Kentucky",
-                       output = "tinytable",
-                 align = "lcc")
-
 # =============================================================================
 # Estimate 2 
 
@@ -106,15 +93,6 @@ e_md_2 %>%
 e_2_1 %>% select(observed,number_ci_low,number_ci_hi,obs_death_rate,rate_ci_low,rate_ci_hi,county) %>% 
   write_csv(.,here("Submission","e2_1.csv"))
 
-# %>%
-#   select(
-#     County                  = county,
-#     `Pandemic Death Rate (95 percent CI)`,
-#     `Pandemic Death Number (95 percent CI)`
-#   ) %>% datasummary_df(title = "Estimand 2: The total number and rate of panedmic deaths in Maryland",
-                       output = "tinytable",
-                       align = "lcc")
-
 
 # ------------------------------
 # KY 
@@ -139,15 +117,6 @@ e_2_2 = e_ky_2 %>%
   ) 
 e_2_2 %>% select(observed,number_ci_low,number_ci_hi,obs_death_rate,rate_ci_low,rate_ci_hi,county) %>% 
   write_csv(.,here("Submission","e2_2.csv"))
-
-
-  select(
-    County                  = county,
-    `Pandemic Death Rate (95 percent CI)`,
-    `Pandemic Death Number (95 percent CI)`
-  )  %>% datasummary_df(title = "Estimand 2: The total number and rate of panedmic deaths in Kentucky",
-                       output = "tinytable",
-                       align = "lcc")
 
 
 # ------------------------------
